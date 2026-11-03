@@ -1,0 +1,10 @@
+catkin_ws/build/
+catkin_ws/devel/
+catkin_ws/install/
+.remember/
+.DS_Store
+*.zip
+__pycache__/
+.pytest_cache/
+.coverage
+*.bak

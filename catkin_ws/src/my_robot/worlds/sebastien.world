@@ -1,0 +1,280 @@
+<?xml version="1.0" ?>
+<!--
+  Two-room building in the Building Editor's saved layout (a static "building" model of Wall_N links).
+  Interior: west room, east room, east entrance; the Start Pose is the middle doorway at (0, 0).
+  Furniture breaks the building's mirror symmetry so the lidar view differs from place to place.
+-->
+<sdf version="1.6">
+  <world name="default">
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- Light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>1</shadows>
+    </scene>
+
+    <model name="building">
+      <pose>0 0 0 0 0 0</pose>
+      <static>1</static>
+
+      <!-- North wall -->
+      <link name="Wall_0">
+        <pose>0 3 0 0 0 0</pose>
+        <collision name="Wall_0_Collision">
+          <geometry><box><size>8.15 0.15 1</size></box></geometry>
+          <pose>0 0 0.5 0 0 0</pose>
+        </collision>
+        <visual name="Wall_0_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>8.15 0.15 1</size></box></geometry>
+          <material>
+            <ambient>0.45 0.4 0.35 1</ambient>
+            <diffuse>0.6 0.55 0.5 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- South wall -->
+      <link name="Wall_1">
+        <pose>0 -3 0 0 0 0</pose>
+        <collision name="Wall_1_Collision">
+          <geometry><box><size>8.15 0.15 1</size></box></geometry>
+          <pose>0 0 0.5 0 0 0</pose>
+        </collision>
+        <visual name="Wall_1_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>8.15 0.15 1</size></box></geometry>
+          <material>
+            <ambient>0.45 0.4 0.35 1</ambient>
+            <diffuse>0.6 0.55 0.5 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- East wall, north of the 1.2 m entrance -->
+      <link name="Wall_2">
+        <pose>4 1.8 0 0 0 0</pose>
+        <collision name="Wall_2_Collision">
+          <geometry><box><size>0.15 2.4 1</size></box></geometry>
+          <pose>0 0 0.5 0 0 0</pose>
+        </collision>
+        <visual name="Wall_2_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.15 2.4 1</size></box></geometry>
+          <material>
+            <ambient>0.45 0.4 0.35 1</ambient>
+            <diffuse>0.6 0.55 0.5 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- East wall, south of the entrance -->
+      <link name="Wall_3">
+        <pose>4 -1.8 0 0 0 0</pose>
+        <collision name="Wall_3_Collision">
+          <geometry><box><size>0.15 2.4 1</size></box></geometry>
+          <pose>0 0 0.5 0 0 0</pose>
+        </collision>
+        <visual name="Wall_3_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.15 2.4 1</size></box></geometry>
+          <material>
+            <ambient>0.45 0.4 0.35 1</ambient>
+            <diffuse>0.6 0.55 0.5 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- West wall -->
+      <link name="Wall_4">
+        <pose>-4 0 0 0 0 0</pose>
+        <collision name="Wall_4_Collision">
+          <geometry><box><size>0.15 6 1</size></box></geometry>
+          <pose>0 0 0.5 0 0 0</pose>
+        </collision>
+        <visual name="Wall_4_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.15 6 1</size></box></geometry>
+          <material>
+            <ambient>0.45 0.4 0.35 1</ambient>
+            <diffuse>0.6 0.55 0.5 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- Interior partition, north of the 1.8 m doorway -->
+      <link name="Wall_5">
+        <pose>0 1.95 0 0 0 0</pose>
+        <collision name="Wall_5_Collision">
+          <geometry><box><size>0.15 2.1 1</size></box></geometry>
+          <pose>0 0 0.5 0 0 0</pose>
+        </collision>
+        <visual name="Wall_5_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.15 2.1 1</size></box></geometry>
+          <material>
+            <ambient>0.35 0.4 0.45 1</ambient>
+            <diffuse>0.45 0.5 0.6 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- Interior partition, south of the doorway -->
+      <link name="Wall_6">
+        <pose>0 -1.95 0 0 0 0</pose>
+        <collision name="Wall_6_Collision">
+          <geometry><box><size>0.15 2.1 1</size></box></geometry>
+          <pose>0 0 0.5 0 0 0</pose>
+        </collision>
+        <visual name="Wall_6_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.15 2.1 1</size></box></geometry>
+          <material>
+            <ambient>0.35 0.4 0.45 1</ambient>
+            <diffuse>0.45 0.5 0.6 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Furniture: full-height (1 m, like the walls) so the lidar and the Map see every piece.
+         Placed so that no two places in the building look alike to the lidar. -->
+    <model name="furniture">
+      <pose>0 0 0 0 0 0</pose>
+      <static>1</static>
+
+      <!-- West room: bookshelf along the north wall -->
+      <link name="bookshelf">
+        <pose>-2.5 2.7 0 0 0 0</pose>
+        <collision name="bookshelf_Collision">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>1.6 0.4 1</size></box></geometry>
+        </collision>
+        <visual name="bookshelf_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>1.6 0.4 1</size></box></geometry>
+          <material>
+            <ambient>0.3 0.2 0.12 1</ambient>
+            <diffuse>0.45 0.3 0.18 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- West room: round pillar -->
+      <link name="pillar">
+        <pose>-1.5 -1.5 0 0 0 0</pose>
+        <collision name="pillar_Collision">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><cylinder><radius>0.25</radius><length>1</length></cylinder></geometry>
+        </collision>
+        <visual name="pillar_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><cylinder><radius>0.25</radius><length>1</length></cylinder></geometry>
+          <material>
+            <ambient>0.3 0.2 0.12 1</ambient>
+            <diffuse>0.45 0.3 0.18 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- West room: L-shaped counter in the SW corner, long arm on the south wall -->
+      <link name="counter_long">
+        <pose>-3.3 -2.7 0 0 0 0</pose>
+        <collision name="counter_long_Collision">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>1.2 0.4 1</size></box></geometry>
+        </collision>
+        <visual name="counter_long_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>1.2 0.4 1</size></box></geometry>
+          <material>
+            <ambient>0.3 0.2 0.12 1</ambient>
+            <diffuse>0.45 0.3 0.18 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- West room: L-shaped counter, short arm on the west wall -->
+      <link name="counter_short">
+        <pose>-3.7 -2.0 0 0 0 0</pose>
+        <collision name="counter_short_Collision">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.4 1.0 1</size></box></geometry>
+        </collision>
+        <visual name="counter_short_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.4 1.0 1</size></box></geometry>
+          <material>
+            <ambient>0.3 0.2 0.12 1</ambient>
+            <diffuse>0.45 0.3 0.18 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- East room: square crate -->
+      <link name="crate">
+        <pose>2.0 1.6 0 0 0 0</pose>
+        <collision name="crate_Collision">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.8 0.8 1</size></box></geometry>
+        </collision>
+        <visual name="crate_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.8 0.8 1</size></box></geometry>
+          <material>
+            <ambient>0.3 0.2 0.12 1</ambient>
+            <diffuse>0.45 0.3 0.18 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- East room: cabinet near the SE corner -->
+      <link name="cabinet">
+        <pose>3.5 -2.2 0 0 0 0</pose>
+        <collision name="cabinet_Collision">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.5 1.0 1</size></box></geometry>
+        </collision>
+        <visual name="cabinet_Visual">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><box><size>0.5 1.0 1</size></box></geometry>
+          <material>
+            <ambient>0.3 0.2 0.12 1</ambient>
+            <diffuse>0.45 0.3 0.18 1</diffuse>
+            <specular>0 0 0 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- World camera -->
+    <gui fullscreen='0'>
+      <camera name='world_camera'>
+        <pose>-1.5 -9 8 0 0.75 1.4</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+  </world>
+</sdf>

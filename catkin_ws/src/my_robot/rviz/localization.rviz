@@ -1,0 +1,74 @@
+Panels:
+  - Class: rviz/Displays
+    Name: Displays
+  - Class: rviz/Tool Properties
+    Name: Tool Properties
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz/Grid
+      Name: Grid
+      Enabled: false
+      Reference Frame: <Fixed Frame>
+    - Class: rviz/Map
+      Name: Map
+      Enabled: true
+      Topic: /map
+      Color Scheme: map
+      Alpha: 0.7
+    - Class: rviz/Map
+      Name: Global Costmap
+      Enabled: true
+      Topic: /move_base/global_costmap/costmap
+      Color Scheme: costmap
+      Alpha: 0.3
+    - Class: rviz/Map
+      Name: Local Costmap
+      Enabled: true
+      Topic: /move_base/local_costmap/costmap
+      Color Scheme: costmap
+      Alpha: 0.5
+    - Class: rviz/Path
+      Name: Global Plan
+      Enabled: true
+      Topic: /move_base/NavfnROS/plan
+      Color: 25; 255; 0
+    - Class: rviz/RobotModel
+      Name: RobotModel
+      Enabled: true
+      Robot Description: robot_description
+    - Class: rviz/LaserScan
+      Name: LaserScan
+      Enabled: true
+      Topic: /scan
+      Size (m): 0.05
+      Style: Flat Squares
+      Color Transformer: FlatColor
+      Color: 255; 0; 0
+    - Class: rviz/PoseArray
+      Name: Particle Cloud
+      Enabled: true
+      Topic: /particlecloud
+      Shape: Arrow (Flat)
+      Color: 0; 170; 255
+      Arrow Length: 0.2
+  Global Options:
+    Fixed Frame: map
+    Background Color: 48; 48; 48
+    Frame Rate: 30
+  Tools:
+    - Class: rviz/Interact
+    - Class: rviz/MoveCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Topic: /initialpose
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+  Views:
+    Current:
+      Class: rviz/TopDownOrtho
+      Name: Current View
+      Scale: 70
+      X: 0
+      Y: 0
+      Angle: 0

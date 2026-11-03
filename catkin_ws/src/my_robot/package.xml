@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>my_robot</name>
+  <version>0.1.0</version>
+  <description>Differential-drive robot with camera and Hokuyo lidar in a Gazebo building, localized on a known map with AMCL and driven by move_base.</description>
+
+  <maintainer email="henry.sebastien1982@gmail.com">Sebastien Henry</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_plugins</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <exec_depend>map_server</exec_depend>
+  <exec_depend>amcl</exec_depend>
+  <exec_depend>move_base</exec_depend>
+  <exec_depend>navfn</exec_depend>
+  <exec_depend>base_local_planner</exec_depend>
+</package>
