@@ -57,6 +57,7 @@ def render(xyz, rgb, out):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D  # noqa: F401  registers the 3d projection on matplotlib < 3.2
 
     fig = plt.figure(figsize=(16, 7), facecolor="white")
     ax = fig.add_subplot(1, 2, 1, projection="3d")
