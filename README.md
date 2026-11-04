@@ -78,6 +78,8 @@ Drive the robot in either of two ways:
 - **Navigation Goal:** click **2D Nav Goal** in RViz and drag on the Map. `move_base` plans and drives there.
 - **Teleop:** in a third terminal, `rosrun teleop_twist_keyboard teleop_twist_keyboard.py` (`i` forward, `j`/`l` turn, `k` stop). Teleop stops the robot 0.5 s after the last keypress unless the key is held. Over a remote desktop, where keys arrive as single taps, add `_key_timeout:=600` so each key keeps the robot moving until the next one.
 
+Relaunching `amcl.launch` on its own puts the Pose Estimate back at the Start Pose, wherever the robot actually is. Restart `world.launch` as well, or give a **2D Pose Estimate** afterwards. Two warnings fire once at startup and are harmless: `Timed out waiting for transform from robot_footprint to map` and `No laser scan received`. Both appear before AMCL has processed its first scan.
+
 Teleop and `move_base` both publish `/cmd_vel`. Wait for a Navigation Goal to finish ("Goal reached") before driving by keyboard, or `move_base` overrides the keys.
 
 **Kidnapped robot.** Use **2D Pose Estimate** to put the Pose Estimate somewhere wrong. In testing, AMCL did not recover on its own from a wrong guess in the other room: the rooms are similar enough that the wrong pose still scored reasonably, so the random-particle injection never triggered. Re-localizing from scratch does work: `rosservice call /global_localization` scatters particles over the whole Map, and a few metres of driving bring them back to a single cluster on the true pose (screenshots 4a and 4b).
