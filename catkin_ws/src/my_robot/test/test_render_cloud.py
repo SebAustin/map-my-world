@@ -29,6 +29,21 @@ def test_read_ply_returns_points_and_colours(tmp_path):
     assert rgb.tolist() == [[1, 0, 0], [0, 0, 1]]
 
 
+def test_read_ply_ignores_the_camera_element_pcl_appends(tmp_path):
+    path = tmp_path / "pcl.ply"
+    header = ("ply\nformat binary_little_endian 1.0\ncomment PCL generated\nelement vertex 1\n"
+              "property float x\nproperty float y\nproperty float z\n"
+              "property uchar red\nproperty uchar green\nproperty uchar blue\nproperty float nx\n"
+              "element camera 1\nproperty float view_px\nproperty float view_py\nend_header\n")
+    vertex = np.array([(1, 2, 3, 0, 255, 0, 0.5)],
+                      dtype=[("x", "<f4"), ("y", "<f4"), ("z", "<f4"), ("r", "u1"), ("g", "u1"), ("b", "u1"),
+                             ("nx", "<f4")])
+    camera = np.array([(9, 9)], dtype=[("a", "<f4"), ("b", "<f4")])
+    path.write_bytes(header.encode("ascii") + vertex.tobytes() + camera.tobytes())
+    xyz, rgb = render_cloud.read_ply(str(path))
+    assert xyz.tolist() == [[1, 2, 3]] and rgb.tolist() == [[0, 1, 0]]
+
+
 def test_read_ply_rejects_other_files(tmp_path):
     path = tmp_path / "x.ply"
     path.write_bytes(b"not a ply\n")

@@ -21,14 +21,17 @@ def read_ply(path):
     with open(path, "rb") as f:
         if f.readline().strip() != b"ply":
             raise ValueError("%s is not a PLY file" % path)
-        fields, count, fmt = [], 0, None
+        fields, count, fmt, element = [], 0, None, None
         while True:
             line = f.readline().decode("ascii").strip()
             if line.startswith("format"):
                 fmt = line.split()[1]
-            elif line.startswith("element vertex"):
-                count = int(line.split()[2])
-            elif line.startswith("property") and count and "list" not in line:
+            elif line.startswith("element"):
+                # PCL appends a "camera" element after the vertices; only the vertex layout matters here
+                element = line.split()[1]
+                if element == "vertex":
+                    count = int(line.split()[2])
+            elif line.startswith("property") and element == "vertex" and "list" not in line:
                 _, kind, name = line.split()
                 fields.append((name, "<" + PLY_TYPES[kind]))
             elif line == "end_header":
