@@ -16,6 +16,7 @@ catkin_ws/src/
 │   └── worlds/        sebastien.world: two rooms, Furniture and Landmarks
 └── teleop_twist_keyboard/   vendored from ros-teleop
 docs/screenshots/      Gazebo, RViz, database viewer and 3D Map from the graded Mapping Run
+database/rtabmap.db    the graded Mapping Run's Database (Git LFS)
 check_package.sh       static checks (no Gazebo needed)
 ```
 
@@ -147,7 +148,15 @@ Because odometry is Gazebo's ground truth, the robot's path doesn't drift. Loop 
 
 ## Database
 
-The Database from the graded Mapping Run is 178 MB, too large for GitHub, so it is linked instead: **[rtabmap.db on Google Drive](DRIVE_LINK)**.
+The Database from the graded Mapping Run is [`database/rtabmap.db`](database/rtabmap.db) (178 MB). It is over GitHub's 100 MB file limit, so it is stored with [Git LFS](https://git-lfs.com). A plain clone gets a small pointer file in its place; fetch the real file with:
+
+```bash
+sudo apt-get install -y git-lfs && git lfs install
+git lfs pull
+rtabmap-databaseViewer database/rtabmap.db
+```
+
+It can also be downloaded directly from GitHub: open the file above and click **Download raw file**.
 
 ## Results
 
