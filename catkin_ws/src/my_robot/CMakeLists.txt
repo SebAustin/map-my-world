@@ -9,6 +9,6 @@ install(DIRECTORY launch meshes models rviz urdf worlds
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-catkin_install_python(PROGRAMS scripts/make_landmarks.py
+catkin_install_python(PROGRAMS scripts/make_landmarks.py scripts/drive_route.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
