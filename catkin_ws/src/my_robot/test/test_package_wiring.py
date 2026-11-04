@@ -76,6 +76,11 @@ def test_rtabmap_listens_to_the_topics_the_robot_publishes(rtabmap_launch):
         assert remaps[sensor] == published[sensor], sensor
 
 
+def test_rtabmap_nodes_use_the_0_21_package_names(rtabmap_launch):
+    _, node, _ = rtabmap_launch
+    assert node.get("pkg") == "rtabmap_slam"
+
+
 def test_rtabmap_frame_is_the_robot_base_link(rtabmap_launch):
     _, node, _ = rtabmap_launch
     xacro = read("urdf", "my_robot.xacro")
@@ -93,7 +98,7 @@ def test_rtabmap_odom_frame_is_what_the_diff_drive_publishes(rtabmap_launch):
 def test_rtabmapviz_matches_rtabmap_inputs():
     root = parse("launch", "mapping.launch")
     args = launch_args(root)
-    viz = next(n for n in root.iter("node") if n.get("type") == "rtabmapviz")
+    viz = next(n for n in root.iter("node") if n.get("type") == "rtabmap_viz")
     assert node_remaps(viz, args) == {k: v for k, v in node_remaps(rtabmap_node(root), args).items() if k in SENSORS}
     assert node_params(viz)["frame_id"] == node_params(rtabmap_node(root))["frame_id"]
 

@@ -34,8 +34,12 @@ if command -v roslaunch >/dev/null 2>&1; then
   for l in world.launch mapping.launch localization.launch teleop.launch; do
     if roslaunch --files my_robot "$l" >/dev/null 2>&1; then ok "$l"; else bad "$l (source devel/setup.bash first)"; fi
   done
-  if rospack find rtabmap_ros >/dev/null 2>&1; then ok "rtabmap_ros installed"
-  else bad "rtabmap_ros missing (sudo apt-get install ros-noetic-rtabmap-ros)"; fi
+  # roslaunch --files does not check that node executables exist, so look for them directly
+  for node in rtabmap_slam/rtabmap rtabmap_viz/rtabmap_viz; do
+    if [ -x "$(rospack find "${node%/*}" 2>/dev/null | sed 's|/share/|/lib/|')/${node#*/}" ] \
+       || [ -n "$(catkin_find "${node%/*}" "${node#*/}" 2>/dev/null)" ]; then ok "$node"
+    else bad "$node missing (sudo apt-get install ros-noetic-rtabmap-ros)"; fi
+  done
 else
   echo "roslaunch not found: skipping launch resolution (run this on the VM after catkin_make)"
 fi

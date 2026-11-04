@@ -12,9 +12,10 @@
   <!-- rtabmapviz costs CPU the simulation needs; turn it on with rtabmapviz:=true -->
   <arg name="rtabmapviz"        default="false"/>
 
-  <!-- Mapping Node -->
+  <!-- Mapping Node. RTAB-Map 0.21+ (current Noetic apt) moved the nodes out of rtabmap_ros:
+       rtabmap_ros/rtabmap is now rtabmap_slam/rtabmap, rtabmapviz is rtabmap_viz/rtabmap_viz. -->
   <group ns="rtabmap">
-    <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" output="screen">
+    <node name="rtabmap" pkg="rtabmap_slam" type="rtabmap" output="screen">
 
       <!-- Basic RTAB-Map Parameters: robot_footprint is this robot's base link (see my_robot.xacro) -->
       <param name="database_path"       type="string" value="$(arg database_path)"/>
@@ -64,8 +65,8 @@
     </node>
 
     <!-- visualization with rtabmapviz -->
-    <node if="$(arg rtabmapviz)" pkg="rtabmap_ros" type="rtabmapviz" name="rtabmapviz"
-          args="-d $(find rtabmap_ros)/launch/config/rgbd_gui.ini" output="screen">
+    <node if="$(arg rtabmapviz)" pkg="rtabmap_viz" type="rtabmap_viz" name="rtabmapviz"
+          args="-d $(find rtabmap_demos)/launch/config/rgbd_gui.ini" output="screen">
       <param name="subscribe_depth" type="bool"   value="true"/>
       <param name="subscribe_scan"  type="bool"   value="true"/>
       <param name="frame_id"        type="string" value="robot_footprint"/>
