@@ -8,3 +8,4 @@ __pycache__/
 .pytest_cache/
 .coverage
 *.bak
+catkin_ws/.catkin_workspace
