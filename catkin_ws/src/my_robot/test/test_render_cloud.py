@@ -43,6 +43,12 @@ def test_select_drops_the_floor_and_caps_the_point_count():
     assert len(kept) == 2 and (kept[:, 2] > render_cloud.FLOOR_HEIGHT).all()
 
 
+def test_select_drops_invalid_points():
+    xyz = np.array([[0, 0, 0.5], [np.nan, 0, 0.5], [0, np.inf, 0.5]])
+    kept, _ = render_cloud.select(xyz, np.zeros_like(xyz))
+    assert kept.tolist() == [[0, 0, 0.5]]
+
+
 def test_render_writes_an_image(tmp_path):
     pytest.importorskip("matplotlib")
     xyz = np.random.default_rng(0).uniform(0, 1, (100, 3))

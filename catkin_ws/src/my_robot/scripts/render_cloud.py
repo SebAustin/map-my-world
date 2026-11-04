@@ -45,7 +45,8 @@ def read_ply(path):
 
 
 def select(xyz, rgb, floor=FLOOR_HEIGHT, limit=MAX_POINTS, seed=0):
-    keep = xyz[:, 2] > floor
+    keep = np.isfinite(xyz).all(axis=1)
+    keep[keep] = xyz[keep, 2] > floor
     xyz, rgb = xyz[keep], rgb[keep]
     if len(xyz) > limit:
         idx = np.random.default_rng(seed).choice(len(xyz), limit, replace=False)
