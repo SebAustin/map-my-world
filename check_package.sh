@@ -16,7 +16,10 @@ for f in "$PKG"/launch/*.launch "$PKG"/worlds/*.world "$PKG"/urdf/*.gazebo "$PKG
 done
 
 echo "Map generator tests"
-if python3 -m pytest -q "$PKG/test" >/dev/null 2>&1; then ok "pytest"; else bad "pytest (run: python3 -m pytest $PKG/test)"; fi
+if ! python3 -c "import pytest" 2>/dev/null; then
+  echo "  skip  pytest not installed (pip3 install pytest)"
+elif python3 -m pytest -q "$PKG/test" >/dev/null 2>&1; then ok "pytest"
+else bad "pytest (run: python3 -m pytest $PKG/test)"; fi
 
 echo "Map matches World and YAML"
 python3 - "$PKG" <<'EOF' || fail=1
