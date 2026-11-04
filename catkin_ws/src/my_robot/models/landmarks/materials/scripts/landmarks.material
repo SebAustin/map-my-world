@@ -1,0 +1,169 @@
+material Landmark/PosterA
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.8 0.8 0.8 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      texture_unit
+      {
+        texture poster_a.png
+        filtering anisotropic
+      }
+    }
+  }
+}
+
+material Landmark/PosterB
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.8 0.8 0.8 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      texture_unit
+      {
+        texture poster_b.png
+        filtering anisotropic
+      }
+    }
+  }
+}
+
+material Landmark/PosterC
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.8 0.8 0.8 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      texture_unit
+      {
+        texture poster_c.png
+        filtering anisotropic
+      }
+    }
+  }
+}
+
+material Landmark/PosterD
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.8 0.8 0.8 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      texture_unit
+      {
+        texture poster_d.png
+        filtering anisotropic
+      }
+    }
+  }
+}
+
+material Landmark/PosterE
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.8 0.8 0.8 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      texture_unit
+      {
+        texture poster_e.png
+        filtering anisotropic
+      }
+    }
+  }
+}
+
+material Landmark/PosterF
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.8 0.8 0.8 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      texture_unit
+      {
+        texture poster_f.png
+        filtering anisotropic
+      }
+    }
+  }
+}
+
+material Landmark/PosterG
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.8 0.8 0.8 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      texture_unit
+      {
+        texture poster_g.png
+        filtering anisotropic
+      }
+    }
+  }
+}
+
+material Landmark/PosterH
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.8 0.8 0.8 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      texture_unit
+      {
+        texture poster_h.png
+        filtering anisotropic
+      }
+    }
+  }
+}
+
+material Landmark/PosterI
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.8 0.8 0.8 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      texture_unit
+      {
+        texture poster_i.png
+        filtering anisotropic
+      }
+    }
+  }
+}
+
+material Landmark/PosterJ
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.8 0.8 0.8 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      texture_unit
+      {
+        texture poster_j.png
+        filtering anisotropic
+      }
+    }
+  }
+}

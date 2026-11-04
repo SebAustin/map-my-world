@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Keyboard driving for a Mapping Run: i forward, j/l turn, k stop, q/z speed up/down.
+     The robot stops key_timeout seconds after the last keypress. Over a remote desktop, where keys
+     arrive as single taps, use key_timeout:=600 so each key keeps the robot moving until the next one. -->
+<launch>
+  <arg name="key_timeout" default="0.5"/>
+  <!-- Start slow: features blur less and Loop Closures come sooner -->
+  <arg name="speed"       default="0.3"/>
+  <arg name="turn"        default="0.6"/>
+  <!-- The teleop node reads keys from a terminal, which roslaunch does not give it, so it opens its own
+       xterm (sudo apt-get install xterm). Pass launch_prefix:="" only if starting it some other way. -->
+  <arg name="launch_prefix" default="xterm -e"/>
+
+  <node name="teleop" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py"
+        output="screen" launch-prefix="$(arg launch_prefix)">
+    <param name="key_timeout" value="$(arg key_timeout)"/>
+    <param name="speed"       value="$(arg speed)"/>
+    <param name="turn"        value="$(arg turn)"/>
+  </node>
+</launch>

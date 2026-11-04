@@ -5,10 +5,10 @@ find_package(catkin REQUIRED)
 
 catkin_package()
 
-install(DIRECTORY config launch maps meshes rviz urdf worlds
+install(DIRECTORY launch meshes models rviz urdf worlds
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-catkin_install_python(PROGRAMS scripts/make_map.py
+catkin_install_python(PROGRAMS scripts/make_landmarks.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

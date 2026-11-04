@@ -16,22 +16,18 @@ Visualization Manager:
       Topic: /map
       Color Scheme: map
       Alpha: 0.7
-    - Class: rviz/Map
-      Name: Global Costmap
+    - Class: rviz/PointCloud2
+      Name: 3D Map
       Enabled: true
-      Topic: /move_base/global_costmap/costmap
-      Color Scheme: costmap
-      Alpha: 0.3
-    - Class: rviz/Map
-      Name: Local Costmap
-      Enabled: true
-      Topic: /move_base/local_costmap/costmap
-      Color Scheme: costmap
-      Alpha: 0.5
+      Topic: /rtabmap/cloud_map
+      Style: Points
+      Size (Pixels): 3
+      Color Transformer: RGB8
+      Decay Time: 0
     - Class: rviz/Path
-      Name: Global Plan
+      Name: Robot Path
       Enabled: true
-      Topic: /move_base/NavfnROS/plan
+      Topic: /rtabmap/mapPath
       Color: 25; 255; 0
     - Class: rviz/RobotModel
       Name: RobotModel
@@ -45,13 +41,11 @@ Visualization Manager:
       Style: Flat Squares
       Color Transformer: FlatColor
       Color: 255; 0; 0
-    - Class: rviz/PoseArray
-      Name: Particle Cloud
+    - Class: rviz/Image
+      Name: Camera
       Enabled: true
-      Topic: /particlecloud
-      Shape: Arrow (Flat)
-      Color: 0; 170; 255
-      Arrow Length: 0.2
+      Image Topic: /camera/rgb/image_raw
+      Transport Hint: raw
   Global Options:
     Fixed Frame: map
     Background Color: 48; 48; 48
@@ -60,15 +54,14 @@ Visualization Manager:
     - Class: rviz/Interact
     - Class: rviz/MoveCamera
     - Class: rviz/Measure
-    - Class: rviz/SetInitialPose
-      Topic: /initialpose
-    - Class: rviz/SetGoal
-      Topic: /move_base_simple/goal
   Views:
     Current:
-      Class: rviz/TopDownOrtho
+      Class: rviz/Orbit
       Name: Current View
-      Scale: 70
-      X: 0
-      Y: 0
-      Angle: 0
+      Distance: 12
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+      Pitch: 0.9
+      Yaw: 4.7

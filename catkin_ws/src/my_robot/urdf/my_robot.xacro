@@ -128,8 +128,8 @@
   <xacro:wheel side="left"  y_sign="1"/>
   <xacro:wheel side="right" y_sign="-1"/>
 
-  <!-- Camera on the front face of the chassis -->
-  <link name="camera">
+  <!-- RGB-D camera (simulated Kinect) on the front face of the chassis -->
+  <link name="camera_link">
     <inertial>
       <mass value="0.1"/>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -154,9 +154,19 @@
   <joint name="camera_joint" type="fixed">
     <origin xyz="${chassis_length/2} 0 0" rpy="0 0 0"/>
     <parent link="chassis"/>
-    <child link="camera"/>
+    <child link="camera_link"/>
     <axis xyz="0 1 0" rpy="0 0 0"/>
   </joint>
+
+  <!-- Optical frame: z forward, x right, y down, the convention the Kinect plugin publishes images in -->
+  <joint name="camera_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.5707 0 -1.5707"/>
+    <parent link="camera_link"/>
+    <child link="camera_link_optical"/>
+  </joint>
+
+  <link name="camera_link_optical">
+  </link>
 
   <!-- Hokuyo lidar on top of the chassis. Its beams sit 0.27 m above the ground, clear of the
        0.24 m wheel tops, so the rear of the 270-degree scan does not hit the robot's own wheels. -->

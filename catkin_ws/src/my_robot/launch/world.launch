@@ -2,7 +2,7 @@
 
 <launch>
 
-  <!-- Start Pose: the middle doorway, facing east (must match the AMCL initial pose in amcl.launch) -->
+  <!-- Start Pose: the middle doorway, facing east -->
   <arg name="x" default="0"/>
   <arg name="y" default="0"/>
   <arg name="z" default="0"/>
@@ -30,8 +30,8 @@
               -x $(arg x) -y $(arg y) -z $(arg z)
               -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
 
-  <!-- RViz in the map frame: the Map, Particle Cloud and costmaps appear once amcl.launch is running -->
+  <!-- RViz in the map frame: the Map, 3D Map and Robot Path appear once mapping.launch is running -->
   <node name="rviz" pkg="rviz" type="rviz" respawn="false"
-        args="-d $(find my_robot)/rviz/localization.rviz"/>
+        args="-d $(find my_robot)/rviz/mapping.rviz"/>
 
 </launch>

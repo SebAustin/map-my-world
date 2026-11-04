@@ -1,158 +1,141 @@
-# Where Am I?
+# Map My World
 
-Udacity Robotics Software Engineer, project 3. The differential-drive robot from [Go Chase It](https://github.com/SebAustin/go-chase-it) finds and keeps track of its Pose Estimate on a known Map of its building, using AMCL on lidar and odometry. It can be driven by keyboard or sent Navigation Goals through `move_base`. Vocabulary is in [GLOSSARY.md](GLOSSARY.md).
+Udacity Robotics Software Engineer, project 4. The differential-drive robot from [Where Am I?](https://github.com/SebAustin/where-am-i) gets an RGB-D camera and builds its own Map (2D occupancy grid) and 3D Map of its building with RTAB-Map, while you drive it by keyboard. Vocabulary is in [GLOSSARY.md](GLOSSARY.md).
 
 ```
 catkin_ws/src/
 ├── my_robot/
-│   ├── config/        move_base costmap and local planner parameters
-│   ├── launch/        world.launch (Gazebo + RViz), amcl.launch (map_server, amcl, move_base)
-│   ├── maps/          map.pgm + map.yaml, generated from the World
+│   ├── launch/        world.launch (Gazebo + RViz), mapping.launch, localization.launch, teleop.launch
 │   ├── meshes/        hokuyo.dae
-│   ├── rviz/          localization.rviz
-│   ├── scripts/       make_map.py (World -> Map)
-│   ├── test/          pytest for make_map.py
+│   ├── models/        landmarks: poster textures + OGRE material script (model://landmarks)
+│   ├── rviz/          mapping.rviz
+│   ├── scripts/       make_landmarks.py (regenerates the poster textures)
+│   ├── test/          pytest: launch/robot/World wiring, poster generator
 │   ├── urdf/          my_robot.xacro, my_robot.gazebo
-│   └── worlds/        sebastien.world: two rooms plus Furniture
+│   └── worlds/        sebastien.world: two rooms, Furniture and Landmarks
 └── teleop_twist_keyboard/   vendored from ros-teleop
-docs/screenshots/      submission screenshots
+docs/                  submission screenshots
 check_package.sh       static checks (no Gazebo needed)
 ```
 
-## The World and the Map
+## The World and its Landmarks
 
-The building is two 4 × 6 m rooms joined by a 1.8 m doorway, with an opening in the east wall. On its own, that layout is mirror-symmetric: a robot in the west room facing east sees nearly the same scan as one in the east room facing west, so AMCL can split into two clusters. Six full-height pieces of Furniture break the symmetry:
+The building is the one from Where Am I?: two 4 × 6 m rooms joined by a 1.8 m doorway, with an opening in the east wall and full-height Furniture that breaks the layout's mirror symmetry for the lidar.
 
-| Room | Furniture | Position |
-|---|---|---|
-| West | bookshelf 1.6 × 0.4 m | north wall, (−2.5, 2.7) |
-| West | pillar, r 0.25 m | (−1.5, −1.5) |
-| West | L-shaped counter | SW corner |
-| East | crate 0.8 × 0.8 m | (2.0, 1.6) |
-| East | cabinet 0.5 × 1.0 m | (3.5, −2.2) |
+RTAB-Map needs more than geometry. It closes loops by recognising places in camera images, and grey walls give it nothing to recognise. So the World now carries Landmarks:
 
-The Map is generated from the World file by `scripts/make_map.py` instead of `pgm_map_creator`, which was written for Kinetic and needs CMake patches on Noetic. The script reads every box and cylinder collision that crosses the lidar's scan height (0.27 m), so the Map lines up with the Gazebo walls exactly. Output: 200 × 160 cells at 0.05 m, origin (−5, −4), covering the building with 1 m of margin.
+- **Textured Furniture.** Each piece wears a different built-in Gazebo texture: bookshelf `Wood`, pillar `Bricks`, L-counter `WoodFloor`, crate `WoodPallet`, cabinet `CeilingTiled`. These ship with Gazebo, so no download is needed.
+- **Ten posters (A–J), one per wall section.** Each is a seeded random collage of high-contrast shapes under a large letter, so every poster gives the feature detector many corners and no two look alike. They are 0.8 × 0.6 m, centred 0.5 m up, which is in view of a camera mounted 0.12 m off the floor.
 
-![Map](docs/map.png)
+| Room | Posters |
+|---|---|
+| West | A north wall, B west wall, C south wall, D and E on the middle wall either side of the doorway |
+| East | F north wall, G east wall, H south wall, I and J on the middle wall either side of the doorway |
 
-Regenerate after editing the World:
+The posters are visual only (no collision), so the lidar, and therefore the Map, sees bare walls. The walls themselves stay plain on purpose. A repeating brick texture on every wall would make different places look alike to the camera and invite false Loop Closures.
+
+The textures live in `models/landmarks/` and reach Gazebo through the `gazebo_model_path` export in `package.xml`. To change a poster, edit `scripts/make_landmarks.py` and run:
 
 ```bash
 cd catkin_ws/src/my_robot
-python3 scripts/make_map.py worlds/sebastien.world maps/map
+python3 scripts/make_landmarks.py models/landmarks   # needs Pillow
 ```
 
-## Robot changes from Go Chase It
+## Robot changes from Where Am I?
 
-- Lidar widened from 180° to 270° (±2.356 rad, like a Hokuyo UTM-30LX), 720 samples on `/scan`. More walls per scan means faster convergence.
-- Lidar raised 5 cm so its beams (0.27 m) clear the wheel tops (0.24 m); otherwise the rear of the wider scan would see the robot's own wheels.
-- Start Pose moved to the middle doorway, (0, 0) facing east, which is also the AMCL initial pose.
+- **Camera → simulated Kinect.** `libgazebo_ros_camera.so` is replaced by `libgazebo_ros_openni_kinect.so` (640 × 480, 60° field of view, 0.1–20 m). It publishes `/camera/rgb/image_raw`, `/camera/depth/image_raw`, `/camera/rgb/camera_info` and `/camera/depth/points`.
+- **`camera` link renamed `camera_link`**, plus a `camera_link_optical` child rotated (−90°, 0, −90°). Images are published in that optical frame (z forward, x right, y down), so the 3D Map lands the right way up.
+- **Unchanged:** the 270° lidar on `/scan`, the base link `robot_footprint`, the Start Pose at the middle doorway facing east, and ground-truth odometry (`odometrySource` = `world`).
 
 ## Setup (Udacity VM, ROS Noetic)
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y ros-noetic-navigation ros-noetic-map-server ros-noetic-move-base ros-noetic-amcl
-git clone https://github.com/SebAustin/where-am-i.git ~/where-am-i
-cd ~/where-am-i/catkin_ws && catkin_make && source devel/setup.bash
+sudo apt-get install -y ros-noetic-rtabmap-ros xterm
+git clone https://github.com/SebAustin/map-my-world.git ~/map-my-world
+cd ~/map-my-world/catkin_ws && catkin_make && source devel/setup.bash
+~/map-my-world/check_package.sh
 ```
 
-If `apt-get update` fails with `EXPKEYSIG F42ED6FBAB17C654`, the VM's ROS signing key has expired. Refresh it and retry the install:
+If `apt-get update` fails with `EXPKEYSIG F42ED6FBAB17C654`, the VM's ROS signing key has expired. Refresh it and retry:
 
 ```bash
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 echo 'deb [signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros/ubuntu focal main' | sudo tee /etc/apt/sources.list.d/ros-latest.list
 ```
 
-## Run
+## A Mapping Run
+
+Three terminals, each with `source ~/map-my-world/catkin_ws/devel/setup.bash`:
 
 ```bash
-roslaunch my_robot world.launch    # terminal 1: Gazebo + RViz
-roslaunch my_robot amcl.launch     # terminal 2: map_server, amcl, move_base
+roslaunch my_robot world.launch      # 1: Gazebo + RViz
+roslaunch my_robot teleop.launch     # 2: opens an xterm; click it and drive
+roslaunch my_robot mapping.launch    # 3: RTAB-Map; add rtabmapviz:=true for its GUI
 ```
 
-RViz opens in the `map` frame. It shows the Map, both costmaps, the lidar scan (red), the global plan (green) and the Particle Cloud (blue arrows). The map-dependent displays turn green once `amcl.launch` is up.
+The teleop window takes `i` (forward), `j`/`l` (turn), `k` (stop), and `q`/`z` to speed up or slow down. It starts at 0.3 m/s. Over a remote desktop, where keys arrive as single taps, use `roslaunch my_robot teleop.launch key_timeout:=600` so each key keeps the robot moving until the next one.
 
-Drive the robot in either of two ways:
+In RViz the Map (grey), the 3D Map (coloured points) and the Robot Path (green) grow as you drive.
 
-- **Navigation Goal:** click **2D Nav Goal** in RViz and drag on the Map. `move_base` plans and drives there.
-- **Teleop:** in a third terminal, `rosrun teleop_twist_keyboard teleop_twist_keyboard.py` (`i` forward, `j`/`l` turn, `k` stop). Teleop stops the robot 0.5 s after the last keypress unless the key is held. Over a remote desktop, where keys arrive as single taps, add `_key_timeout:=600` so each key keeps the robot moving until the next one.
+**Route.** Loop Closures come from seeing the same Landmark again from about the same viewpoint, so repeat one route rather than wandering:
 
-Relaunching `amcl.launch` on its own puts the Pose Estimate back at the Start Pose, wherever the robot actually is. Restart `world.launch` as well, or give a **2D Pose Estimate** afterwards. Two warnings fire once at startup and are harmless: `Timed out waiting for transform from robot_footprint to map` and `No laser scan received`. Both appear before AMCL has processed its first scan.
+1. From the doorway, turn into the west room and drive a slow clockwise lap about 1 m off the walls, past posters D, A, B, C and E and around the pillar.
+2. Back through the doorway, do the same clockwise lap of the east room past I, F, G, H and J.
+3. Repeat both laps twice more. Turn slowly: fast turns blur the image and lose features.
 
-Teleop and `move_base` both publish `/cmd_vel`. Wait for a Navigation Goal to finish ("Goal reached") before driving by keyboard, or `move_base` overrides the keys.
+Three laps usually give well over the required three Loop Closures. RTAB-Map prints `Loop closure detected` lines in terminal 3 as they happen.
 
-**Kidnapped robot.** Use **2D Pose Estimate** to put the Pose Estimate somewhere wrong. In testing, AMCL did not recover on its own from a wrong guess in the other room: the rooms are similar enough that the wrong pose still scored reasonably, so the random-particle injection never triggered. Re-localizing from scratch does work: `rosservice call /global_localization` scatters particles over the whole Map, and a few metres of driving bring them back to a single cluster on the true pose (screenshots 4a and 4b).
+**Stopping.** Press Ctrl+C in terminal 3. The Database is written to `~/.ros/rtabmap.db`. Copy it away before the next run, because `mapping.launch` deletes it on startup:
 
-## AMCL parameters (`launch/amcl.launch`)
+```bash
+cp ~/.ros/rtabmap.db ~/rtabmap_$(date +%H%M).db
+```
+
+## Checking the Database
+
+```bash
+rtabmap-databaseViewer ~/.ros/rtabmap.db
+```
+
+Answer **yes** to using the Database's parameters, then open **View → Constraint View** and **View → Graph View**. The bottom-left counters show the link types. The rubric needs **Global loop closure ≥ 3**. To see the 3D Map, use **Edit → View 3D map**.
+
+If a run ends with fewer than three Loop Closures, lower `Vis/MinInliers` from 15 to 12 in `mapping.launch` and drive the laps again. If the Map shows doubled walls after a Loop Closure, try `Reg/Strategy` 2 (visual then ICP refinement with the lidar).
+
+## Localization on a finished Database
+
+```bash
+roslaunch my_robot world.launch
+roslaunch my_robot localization.launch database_path:=$HOME/rtabmap_1234.db
+```
+
+`localization.launch` is `mapping.launch` with three changes: it keeps the Database instead of deleting it, it drops `Mem/NotLinkedNodesKept`, and it sets `Mem/IncrementalMemory=false` so RTAB-Map only localizes against the Map and never extends it. The robot's pose on the Map appears once it passes a Landmark it recognises.
+
+## RTAB-Map parameters (`launch/mapping.launch`)
 
 | Parameter | Value | Why |
 |---|---|---|
-| `min_particles` / `max_particles` | 500 / 2500 | Enough to cover the start covariance; AMCL shrinks toward 500 once converged |
-| `initial_pose_x/y/a` | 0, 0, 0 | The Start Pose |
-| `initial_cov_xx/yy/aa` | 0.25, 0.25, 0.07 | 0.5 m and ~15° of starting doubt |
-| `update_min_d` / `update_min_a` | 0.1 m / 0.2 rad | Frequent updates at the robot's ≤ 0.5 m/s |
-| `transform_tolerance` | 0.5 | Avoids TF timeout warnings on the VM's slow sim clock |
-| `recovery_alpha_slow/fast` | 0.001 / 0.1 | Injects random particles when the scan match suddenly gets worse (see *Kidnapped robot* for its limits) |
-| `laser_model_type` | likelihood_field | Cheap and robust for walls and Furniture |
-| `laser_max_beams` | 60 | Every 12th of the 720 beams, plenty for a small building |
-| `laser_z_hit` / `laser_z_rand` | 0.95 / 0.05 | The simulated lidar is clean (σ 1 cm) |
-| `laser_likelihood_max_dist` | 2.0 m | Distance over which the likelihood field is computed |
-| `odom_model_type` | diff-corrected | Differential drive |
-| `odom_alpha1..4` | 0.005 | Gazebo odometry is ground truth; diff-corrected expects small values (the 0.2 default is far too noisy) |
+| `frame_id` | `robot_footprint` | This robot's base link (the course template says `base_footprint`, which this robot doesn't have) |
+| `odom_frame_id` | `odom` | Published by the diff-drive plugin |
+| `subscribe_depth` / `subscribe_scan` | true / true | RGB-D camera plus the 270° lidar |
+| `Grid/FromDepth` | false | Map from the lidar: sharp walls, no gaps. The camera builds the 3D Map |
+| `Rtabmap/DetectionRate` | 1 Hz | One new node per second, as in the template |
+| `Reg/Force3DoF` | true | The robot drives on a flat floor: x, y, yaw only |
+| `Kp/DetectorStrategy`, `Vis/FeatureType` | 8 (GFTT/ORB) | Always built in. The template's SURF is in OpenCV's nonfree module, which apt builds usually omit |
+| `Kp/MaxFeatures` | 400 | Visual words per image, as in the template |
+| `Reg/Strategy` | 0 (visual) | As in the template; 2 is the documented fallback |
+| `Vis/MinInliers` | 15 | Matches needed to accept a Loop Closure; 12 if a run falls short |
+| `Mem/NotLinkedNodesKept` | false | Don't store images while the robot stands still |
 
-## move_base parameters (`config/`)
+Because odometry is Gazebo's ground truth, the robot's path doesn't drift. Loop Closures here mainly prove that the camera recognises the building, which is what the rubric measures.
 
-Based on Udacity's `config.zip`, retuned for this robot:
+## Database
 
-| Parameter | Value | Why |
-|---|---|---|
-| `footprint` | 0.5 × 0.3 m rectangle | The real chassis instead of a 0.3 m circle |
-| layers | static, obstacle, inflation | Explicit `plugins` lists (local costmap: obstacle + inflation only) |
-| `inflation_radius` | 0.35 m | Keeps clear of walls; the 1.8 m doorway stays passable |
-| `obstacle_range` / `raytrace_range` | 2.5 / 3.0 m | Marks nearby obstacles and clears free space behind them |
-| `observation_sources` topic | `/scan` | This robot's lidar topic |
-| costmap update / publish | 5 / 2 Hz | Avoids "map update loop missed its desired rate" warnings |
-| local costmap | 4 × 4 m rolling | Small and fast, built from live lidar only |
-| `max_vel_x` / `max_vel_theta` | 0.5 m/s / 1.0 rad/s | Slow enough for AMCL to keep up |
-
-## Stopping for obstacles
-
-The local costmap is built only from the live lidar, so anything that appears in the robot's path gets marked within one scan. Try it: send a Navigation Goal across the building, then drop a box in front of the robot (Insert → Box in Gazebo, or `rosrun gazebo_ros spawn_model`). The box shows up in the costmaps, and the planner routes around the inflated cells. If no path exists, `move_base` runs its recovery behaviours (clear costmaps, rotate in place) and aborts the goal instead of driving into the box.
-
-Tested on the VM: a 0.5 m box spawned at (1.3, −0.55), in the way of a goal at (2.5, −1.2). It appeared in the costmap, and the robot reached the goal without touching it.
+The Database is too large for GitHub (over 100 MB), so it is linked instead: **[rtabmap.db on Google Drive](TODO-add-link-after-mapping-run)**.
 
 ## Results
 
-Measured on the Udacity VM (Gazebo real-time factor 0.98–1.0). Ground truth is Gazebo's `/odom`, which is exact because `odometrySource` is `world`.
-
-| Moment | AMCL pose (x, y, yaw) | Ground truth | Error | AMCL σ (x, y, yaw) |
-|---|---|---|---|---|
-| Just launched | 0.03, 0.01, — | 0, 0, 0° | 4 cm | initial 0.5 m, 15° |
-| Navigation Goal reached, east room | 2.25, −0.91, 154° | 2.29, −0.85, 154° | 7 cm, 0° | 5 cm, 5 cm, 2.6° |
-| Teleop through the doorway | 0.06, 0.64, 173° | 0.13, 0.64, 176° | 7 cm, 3° | 5 cm, 5 cm, 2.3° |
-| Teleop into the west room | −1.81, 0.90, 172° | −1.75, 0.90, 172° | 6 cm, 0° | 5 cm, 6 cm, 1.9° |
-| After global localization and a few metres of driving | −1.60, 0.43, 14° | −1.53, 0.42, 22° | 7 cm, 8° | 4 cm, 7 cm, 2.8° |
-| Navigation Goal past a dropped box | 2.40, −1.11, −10° | 2.42, −1.08, −3° | 4 cm, 7° | 7 cm, 5 cm, 2.6° |
-
-In RViz the converged cloud sits mostly under the robot model, so only a few arrows show at its nose. The cloud's mean matches the AMCL pose exactly.
-
-## Screenshots
-
-**1. Just launched:** the Particle Cloud is spread around the Start Pose, and the scan (red) already lines up with the walls.
-![start](docs/screenshots/01_start.png)
-
-**2. After a Navigation Goal into the east room:** the cloud has collapsed onto the robot, and the scan matches the walls, crate and cabinet.
-![east](docs/screenshots/02_east_room.png)
-
-**3. After teleop back into the west room:** still converged; the scan matches the bookshelf, pillar and counter.
-![west](docs/screenshots/03_west_room.png)
-
-**4a. Kidnapped:** a 2D Pose Estimate in the wrong room. The scan no longer matches the Map.
-![kidnapped](docs/screenshots/04a_kidnapped.png)
-
-**4b. Recovered:** after `/global_localization` and some driving, the cloud is back on the true pose and the scan matches again.
-![recovered](docs/screenshots/04b_recovered.png)
+*To fill in after the Mapping Run on the VM: Loop Closure counts from the database viewer, plus screenshots of the Map, the 3D Map and the Constraint View in `docs/`.*
 
 ## Checks
 
@@ -160,4 +143,4 @@ In RViz the converged cloud sits mostly under the robot model, so only a few arr
 ./check_package.sh
 ```
 
-This checks that the XML is well formed, runs the map-generator tests (skipped if pytest is not installed), confirms that `map.pgm` is in sync with the World and matches `map.yaml`, and confirms that the Start Pose equals the AMCL initial pose. On the VM, after `catkin_make`, it also resolves both launch files with `roslaunch --files`.
+This checks that the XML is well formed, then runs the pytest suite: RTAB-Map's remapped topics match what the Gazebo plugins publish, `frame_id` and `odom_frame_id` match the URDF and diff drive, the optical frame is wired as the brief specifies, `localization.launch` differs from `mapping.launch` exactly as the brief says, and every poster has its material and texture. On the VM, after `catkin_make`, it also resolves all four launch files with `roslaunch --files` and confirms `rtabmap_ros` is installed.
