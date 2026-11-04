@@ -9,12 +9,13 @@ catkin_ws/src/
 │   ├── meshes/        hokuyo.dae
 │   ├── models/        landmarks: poster textures + OGRE material script (model://landmarks)
 │   ├── rviz/          mapping.rviz
-│   ├── scripts/       make_landmarks.py (regenerates the poster textures)
-│   ├── test/          pytest: launch/robot/World wiring, poster generator
+│   ├── scripts/       make_landmarks.py (poster textures), drive_route.py (scripted laps),
+│   │                  render_cloud.py (3D Map picture from an exported cloud)
+│   ├── test/          pytest: launch/robot/World wiring, the three scripts
 │   ├── urdf/          my_robot.xacro, my_robot.gazebo
 │   └── worlds/        sebastien.world: two rooms, Furniture and Landmarks
 └── teleop_twist_keyboard/   vendored from ros-teleop
-docs/                  submission screenshots
+docs/screenshots/      Gazebo, RViz, database viewer and 3D Map from the graded Mapping Run
 check_package.sh       static checks (no Gazebo needed)
 ```
 
@@ -48,6 +49,8 @@ python3 scripts/make_landmarks.py models/landmarks   # needs Pillow
 - **Unchanged:** the 270° lidar on `/scan`, the base link `robot_footprint`, the Start Pose at the middle doorway facing east, and ground-truth odometry (`odometrySource` = `world`).
 
 ## Setup (Udacity VM, ROS Noetic)
+
+The current Noetic package is RTAB-Map 0.21, which moved the nodes out of `rtabmap_ros`: the course template's `rtabmap_ros/rtabmap` is now `rtabmap_slam/rtabmap`, and `rtabmapviz` is `rtabmap_viz/rtabmap_viz`. The launch files here use the new names.
 
 ```bash
 sudo apt-get update
@@ -84,7 +87,13 @@ In RViz the Map (grey), the 3D Map (coloured points) and the Robot Path (green) 
 2. Back through the doorway, do the same clockwise lap of the east room past I, F, G, H and J.
 3. Repeat both laps twice more. Turn slowly: fast turns blur the image and lose features.
 
-Three laps usually give well over the required three Loop Closures. RTAB-Map prints `Loop closure detected` lines in terminal 3 as they happen.
+Three laps usually give well over the required three Loop Closures. To watch them arrive, run `rostopic echo /rtabmap/info/loopClosureId` in a fourth terminal: any value above 0 is a Loop Closure.
+
+**Scripted laps.** Over a remote desktop, where held keys don't come through, the same route can be driven automatically. It publishes the same `/cmd_vel` as teleop and steers by `/odom` from waypoint to waypoint, about 2 minutes per lap:
+
+```bash
+rosrun my_robot drive_route.py _laps:=3    # instead of teleop.launch
+```
 
 **Stopping.** Press Ctrl+C in terminal 3. The Database is written to `~/.ros/rtabmap.db`. Copy it away before the next run, because `mapping.launch` deletes it on startup:
 
@@ -98,7 +107,14 @@ cp ~/.ros/rtabmap.db ~/rtabmap_$(date +%H%M).db
 rtabmap-databaseViewer ~/.ros/rtabmap.db
 ```
 
-Answer **yes** to using the Database's parameters, then open **View → Constraint View** and **View → Graph View**. The bottom-left counters show the link types. The rubric needs **Global loop closure ≥ 3**. To see the 3D Map, use **Edit → View 3D map**.
+Answer **yes** to using the Database's parameters, then open **View → Constraints view** and **View → Graph view**. The line under the graph reads `Links (N, NM, G, LS, LT, U, P, LM, GR)`. The rubric needs **G (global Loop Closures) ≥ 3**. To see the 3D Map, use **Edit → View 3D map**.
+
+Over a remote desktop the 3D viewer can't be zoomed (wheel events don't come through). Export the cloud and draw it instead:
+
+```bash
+rtabmap-export --output_dir ~/export --output map --voxel 0.02 ~/.ros/rtabmap.db
+python3 catkin_ws/src/my_robot/scripts/render_cloud.py ~/export/map_cloud.ply ~/export/3d_map.png
+```
 
 If a run ends with fewer than three Loop Closures, lower `Vis/MinInliers` from 15 to 12 in `mapping.launch` and drive the laps again. If the Map shows doubled walls after a Loop Closure, try `Reg/Strategy` 2 (visual then ICP refinement with the lidar).
 
@@ -118,7 +134,7 @@ roslaunch my_robot localization.launch database_path:=$HOME/rtabmap_1234.db
 | `frame_id` | `robot_footprint` | This robot's base link (the course template says `base_footprint`, which this robot doesn't have) |
 | `odom_frame_id` | `odom` | Published by the diff-drive plugin |
 | `subscribe_depth` / `subscribe_scan` | true / true | RGB-D camera plus the 270° lidar |
-| `Grid/FromDepth` | false | Map from the lidar: sharp walls, no gaps. The camera builds the 3D Map |
+| `Grid/Sensor` | 0 (laser) | Map from the lidar: sharp walls, no gaps. The camera builds the 3D Map. Called `Grid/FromDepth` before 0.21 |
 | `Rtabmap/DetectionRate` | 1 Hz | One new node per second, as in the template |
 | `Reg/Force3DoF` | true | The robot drives on a flat floor: x, y, yaw only |
 | `Kp/DetectorStrategy`, `Vis/FeatureType` | 8 (GFTT/ORB) | Always built in. The template's SURF is in OpenCV's nonfree module, which apt builds usually omit |
@@ -131,11 +147,35 @@ Because odometry is Gazebo's ground truth, the robot's path doesn't drift. Loop 
 
 ## Database
 
-The Database is too large for GitHub (over 100 MB), so it is linked instead: **[rtabmap.db on Google Drive](TODO-add-link-after-mapping-run)**.
+The Database from the graded Mapping Run is 178 MB, too large for GitHub, so it is linked instead: **[rtabmap.db on Google Drive](DRIVE_LINK)**.
 
 ## Results
 
-*To fill in after the Mapping Run on the VM: Loop Closure counts from the database viewer, plus screenshots of the Map, the 3D Map and the Constraint View in `docs/`.*
+One Mapping Run on the Udacity VM (Noetic, RTAB-Map 0.21.13, Gazebo real-time factor 0.95–1.0): three laps of the route above with `drive_route.py`, 7 minutes of simulated time.
+
+| Measure | Value |
+|---|---|
+| Poses (nodes) | 376 |
+| Path length | 77.9 m |
+| **Global Loop Closures (G)** | **153** (rubric: ≥ 3) |
+| Local Loop Closures by space (LS) | 135 |
+| Neighbour links (N) | 375 |
+| Database size | 178 MB |
+| `localization.launch` on a copy of the Database | no errors; 42 of 55 updates during part of a lap matched the Database |
+
+The first two Loop Closures were already accepted within the first 45 nodes, during lap 1. Candidates with too few matching features were rejected (for example 0/15 inliers), as `Vis/MinInliers` intends. With ground-truth odometry the path never drifts, so the Loop Closures don't visibly move the Map: walls stay single, and the Map and 3D Map line up with the World's walls (x = ±4 m, y = ±3 m, the middle wall at x = 0) in the top view below.
+
+**1. The World in Gazebo**: textured Furniture and the posters, with the robot back at the doorway after the run.
+![Gazebo](docs/screenshots/01_gazebo_world.png)
+
+**2. RViz at the end of the run**: the Map built from the lidar, the Robot Path (green) over three laps, and the camera view (top left) facing a poster.
+![RViz](docs/screenshots/02_rviz_mapping.png)
+
+**3. rtabmap-databaseViewer**: the Graph view (left) with the Map and the robot's path, and a Loop Closure between two sightings of poster B (middle; cyan lines join the matching features). The counters bottom left read `375, 0, 153, 135, …` for N, NM, G, LS.
+![Database viewer](docs/screenshots/03_database_viewer.png)
+
+**4. The 3D Map** from the RGB-D camera (floor removed, exported with `rtabmap-export` and drawn with `render_cloud.py`). The walls, doorway, crate, pillar, cabinet and L-counter sit where they are in the World, coloured by the camera, with the posters visible on the walls.
+![3D Map](docs/screenshots/04_3d_map.png)
 
 ## Checks
 

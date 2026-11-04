@@ -39,8 +39,9 @@
       <!-- 2D SLAM -->
       <param name="Reg/Force3DoF" type="string" value="true"/>
 
-      <!-- Map from the 270-degree lidar (sharp, gap-free walls); the camera builds the 3D Map -->
-      <param name="Grid/FromDepth" type="string" value="false"/>
+      <!-- Map from the 270-degree lidar (sharp, gap-free walls); the camera builds the 3D Map.
+           0=laser scan, 1=depth image, 2=both. (Older RTAB-Map called this Grid/FromDepth.) -->
+      <param name="Grid/Sensor" type="string" value="0"/>
 
       <!-- Loop Closure Detection -->
       <!-- 0=SURF 1=SIFT 2=ORB 3=FAST/FREAK 4=FAST/BRIEF 5=GFTT/FREAK 6=GFTT/BRIEF 7=BRISK 8=GFTT/ORB 9=KAZE -->

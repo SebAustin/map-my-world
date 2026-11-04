@@ -78,4 +78,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as error:  # rospy.ROSInterruptException on Ctrl+C: stop quietly, the robot is already stopped
+        if type(error).__name__ != "ROSInterruptException":
+            raise
